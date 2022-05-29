@@ -10,7 +10,6 @@ namespace bank {
 		{
 			account_number_ = account_number;
 		}
-
 		void BankAccount::set_last_name(std::string_view last_name)
 		{
 			last_name_ = last_name;

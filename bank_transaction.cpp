@@ -7,21 +7,13 @@ namespace bank {
         namespace {
             using ::bank::db::DBConnection;
             using ::bank::entity::BankAccount;
-
-            auto del_con = [](sql::Connection* con)  // custom deleter
-            {
-                delete con;
-            };
         }
 
-        BankTransaction::BankTransaction(const std::string& url, const std::string& username, const std::string& password)
-        {
-            std::unique_ptr<sql::Connection, decltype(del_con)> con(get_driver_instance()->connect(url, username, password), del_con);
-            this->db_conn_ = std::make_unique<DBConnection>(con);
+        BankTransaction::BankTransaction(const std::string& url, const std::string& username, const std::string& password) {
+            this->db_conn_ = std::make_unique<DBConnection>(url, username, password);
         }
-        bool BankTransaction::createAccount(const BankAccount&)
-        {
+
+        bool BankTransaction::createAccount(const BankAccount&) {
             return false; 
         }
-    
 }

@@ -10,15 +10,25 @@
 
 namespace bank {
     namespace db {
-        std::vector<std::vector<std::string>> DBConnection::query(const std::string& schema, const std::string& query, int size_of_column)
-        {
+        namespace {
+            void print_error_message(sql::SQLException& e) {
+
+                std::cout << "# ERR: SQLException in " << __FILE__;
+                std::cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
+                std::cout << "# ERR: " << e.what();
+                std::cout << " (MySQL error code: " << e.getErrorCode();
+                std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+            }
+        }
+        std::vector<std::vector<std::string>> DBConnection::query(const std::string& schema, const std::string& query, int size_of_column) {
             try {
-                
+                std::unique_ptr<sql::Connection> con(get_driver_instance()->connect(url_, username_, password_));
+
                 /* Connect to the MySQL test database */
-                con_->setSchema(schema);
+                con->setSchema(schema);
 
                 // Send query to database
-                std::unique_ptr<sql::ResultSet> res(con_->createStatement()->executeQuery(query));
+                std::unique_ptr<sql::ResultSet> res(con->createStatement()->executeQuery(query));
                 
                 std::vector<std::vector<std::string>> output;
 
@@ -29,21 +39,13 @@ namespace bank {
                     }
                     output.push_back(tmp);
                 }
-
                 return output;
             } catch (sql::SQLException& e) {
-                
-                std::cout << "# ERR: SQLException in " << __FILE__;
-                std::cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
-                std::cout << "# ERR: " << e.what();
-                std::cout << " (MySQL error code: " << e.getErrorCode();
-                std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-            
+                print_error_message(e);
             }
         }
-        bool DBConnection::write(const std::string& schema, const std::string& query)
-        {
-           
+        bool DBConnection::write(const std::string& schema, const std::string& query) {
+            
             return false;
             
         }
