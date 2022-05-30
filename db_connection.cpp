@@ -20,15 +20,19 @@ namespace bank {
                 std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
             }
         }
-        std::vector<std::vector<std::string>> DBConnection::query(const std::string& schema, const std::string& query, int size_of_column) {
+        std::vector<std::vector<std::string>> DBConnection::query(const std::string& schema, 
+                                                                  const std::string& query, 
+                                                                  int size_of_column) {
             try {
-                std::unique_ptr<sql::Connection> con(get_driver_instance()->connect(url_, username_, password_));
+                std::unique_ptr<sql::Connection> 
+                    con(get_driver_instance()->connect(url_, username_, password_));
 
                 /* Connect to the MySQL test database */
                 con->setSchema(schema);
 
                 // Send query to database
-                std::unique_ptr<sql::ResultSet> res(con->createStatement()->executeQuery(query));
+                std::unique_ptr<sql::ResultSet> 
+                    res(con->createStatement()->executeQuery(query));
                 
                 std::vector<std::vector<std::string>> output;
 
@@ -44,10 +48,38 @@ namespace bank {
                 print_error_message(e);
             }
         }
-        bool DBConnection::write(const std::string& schema, const std::string& query) {
-            
-            return false;
-            
+
+        bool  DBConnection::add(const std::string& schema,
+                                const std::string& statement,
+                                const std::vector<Data>& input) {
+            try {
+                std::unique_ptr<sql::Connection> 
+                    con(get_driver_instance()->connect(url_, username_, password_));
+                con->setSchema(schema);
+                std::unique_ptr<sql::PreparedStatement> 
+                    pstmt(con->prepareStatement(statement));
+                for (int i = 0; i < input.size(); ++i) {
+                    switch (input[i].type) {
+                    case SQLTYPE::kString: 
+                        pstmt->setString(i + 1, input[i].value.string_value);
+                        break;
+                    case SQLTYPE::kInteger: 
+                        pstmt->setInt(i + 1, input[i].value.int_value);
+                        break;
+                    case SQLTYPE::kDouble: 
+                        pstmt->setDouble(i + 1, input[i].value.double_value);
+                        break;
+                    default: 
+                        std::cout << "Error: input data has unknow sqltype." << std::endl;
+                        return true;
+                    }
+                }
+                pstmt->execute();
+                return true;
+            } catch (sql::SQLException& e) {
+                print_error_message(e);
+                return false;
+            }
         }
     }
 }

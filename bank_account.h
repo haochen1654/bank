@@ -13,8 +13,8 @@ namespace bank {
                 std::string_view last_name,
                 double balance) :
                 account_number_(account_number),
-                first_name_(first_name_),
-                last_name_(last_name_),
+                first_name_(first_name),
+                last_name_(last_name),
                 balance_(balance) {}
             ~BankAccount() {}
 

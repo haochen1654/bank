@@ -5,6 +5,8 @@
 #include <cppconn/driver.h>
 #include <cppconn/exception.h>
 #include <cppconn/prepared_statement.h>
+#include "bank_transaction.h"
+
 using namespace std;
 
 //for demonstration only. never save your password in the code!
@@ -39,6 +41,9 @@ int main()
     cout << "Finished dropping table (if existed)" << endl;
     stmt->execute("CREATE TABLE inventory (id serial PRIMARY KEY, name VARCHAR(50), quantity INTEGER);");
     cout << "Finished creating table" << endl;
+    stmt->execute("DROP TABLE IF EXISTS bank_account");
+    cout << "Finished dropping table (if existed)" << endl;
+    stmt->execute("CREATE TABLE bank_account (id serial PRIMARY KEY, first_name VARCHAR(50), last_name VARCHAR(50), balance DOUBLE);");
     delete stmt;
 
     pstmt = con->prepareStatement("INSERT INTO inventory(name, quantity) VALUES(?,?)");
@@ -71,6 +76,10 @@ int main()
 
     delete pstmt;
     delete con;
+    bank::BankTransaction trans(server, username, password, "quickstartdb");
+    const bank::entity::BankAccount account_test(1, "henry", "chen", 100);
+    trans.createAccount(account_test);
+    
     system("pause");
     return 0;
 }
